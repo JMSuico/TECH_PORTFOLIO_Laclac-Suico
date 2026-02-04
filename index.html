@@ -71,6 +71,56 @@
         .animate-neon-pulse {
             animation: neon-pulse 3s infinite ease-in-out;
         }
+        
+        @keyframes pulse-glow-number {
+            0%, 100% { text-shadow: 0 0 10px rgba(6, 182, 212, 0.5); }
+            50% { text-shadow: 0 0 25px rgba(6, 182, 212, 0.8), 0 0 40px rgba(6, 182, 212, 0.4); }
+        }
+        .animate-pulse-glow-number {
+            animation: pulse-glow-number 1.5s ease-out;
+        }
+        
+        @keyframes modal-slide-in {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        .animate-in.zoom-in-95 {
+            animation: modal-slide-in 0.3s ease-out;
+        }
+        
+        @keyframes fade-in {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .animate-in.fade-in {
+            animation: fade-in 0.3s ease-out;
+        }
+        
+        @keyframes slide-from-bottom {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .animate-in.slide-in-from-bottom-4 {
+            animation: slide-from-bottom 0.5s ease-out;
+        }
+        
+        @media (max-width: 768px) {
+            .project-modal-content {
+                max-height: 90vh;
+            }
+        }
     </style>
 <script type="importmap">
 {

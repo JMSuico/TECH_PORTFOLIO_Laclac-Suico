@@ -7,6 +7,7 @@ export interface Project {
   thumbnail: string;
   demoUrl: string;
   codeUrl: string;
+  challenges?: string[];
 }
 
 export interface Story {
