@@ -15,19 +15,22 @@ import {
   Layers,
   MonitorSmartphone,
   Send,
-  ExternalLink
+  ExternalLink,
+  X,
+  CheckCircle
 } from 'lucide-react';
 import { PROJECTS, STORIES, SKILLS } from './constants';
-import { Story } from './types';
+import { Story, Project } from './types';
 import { GoogleGenAI } from "@google/genai";
 
-// 1. SCROLL-TRIGGERED STATS COMPONENT
+// 1. ENHANCED SCROLL-TRIGGERED STATS COMPONENT with neon trail
 const Counter = ({ value, duration = 2000, suffix = "" }: { value: string, duration?: number, suffix?: string }) => {
   const [count, setCount] = useState(0);
   const targetValue = parseInt(value.replace(/,/g, ''));
   const hasTriggered = useRef(false);
   const [isVisible, setIsVisible] = useState(false);
   const elementRef = useRef<HTMLDivElement>(null);
+  const [pulse, setPulse] = useState(false);
 
   useEffect(() => {
     const observer = new IntersectionObserver(([entry]) => {
@@ -40,19 +43,35 @@ const Counter = ({ value, duration = 2000, suffix = "" }: { value: string, durat
   useEffect(() => {
     if (isVisible && !hasTriggered.current) {
       hasTriggered.current = true;
+      setPulse(true);
       let startTimestamp: number | null = null;
       const step = (timestamp: number) => {
         if (!startTimestamp) startTimestamp = timestamp;
         const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-        setCount(Math.floor(progress * targetValue));
+        // Eased cubic animation for fluidity
+        const easedProgress = progress < 0.5 
+          ? 4 * progress * progress * progress 
+          : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+        setCount(Math.floor(easedProgress * targetValue));
         if (progress < 1) window.requestAnimationFrame(step);
       };
       window.requestAnimationFrame(step);
+      setTimeout(() => setPulse(false), duration);
     }
   }, [isVisible, targetValue, duration]);
 
   const formatted = count >= 1000000 ? (count / 1000000).toFixed(0) + 'M' : count.toLocaleString();
-  return <div ref={elementRef} className="inline-block">{formatted}{suffix}</div>;
+  return (
+    <div 
+      ref={elementRef} 
+      className={`inline-block transition-all duration-300 ${pulse ? 'animate-pulse-glow-number' : ''}`}
+      style={{
+        textShadow: pulse ? '0 0 20px rgba(6, 182, 212, 0.8), 0 0 40px rgba(6, 182, 212, 0.4)' : 'none'
+      }}
+    >
+      {formatted}{suffix}
+    </div>
+  );
 };
 
 // SECTION HEADER
@@ -103,7 +122,69 @@ const Navbar = () => {
   );
 };
 
-// 2. STORY MODAL (Expansion for truncated plots)
+// PROJECT MODAL for expanded project details
+const ProjectModal = ({ project, onClose }: { project: Project, onClose: () => void }) => {
+  const challenges = {
+    '1': ['Complex shader optimization', 'Memory management in VR environments', 'Real-time physics calculations', 'AI pathfinding in dynamic worlds'],
+    '2': ['Implementing recursive AI logic', 'Managing quantum state uncertainty', 'Natural language processing', 'Database optimization for large-scale simulations'],
+    '3': ['Network packet simulation', 'Vulnerability discovery algorithms', 'Real-time threat detection', 'Distributed system debugging']
+  };
+  
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-6 bg-black/90 backdrop-blur-md">
+      <div className="w-full max-w-4xl glass border-cyan-500/30 rounded-3xl overflow-hidden shadow-[0_0_100px_rgba(6,182,212,0.3)] max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-300">
+        <div className="relative h-80">
+          <img src={project.thumbnail} alt={project.title} className="w-full h-full object-cover" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0B0E14] to-transparent" />
+          <button onClick={onClose} className="absolute top-4 right-4 w-10 h-10 rounded-full glass flex items-center justify-center text-white hover:bg-white/10 transition-colors z-10">
+            <X className="w-6 h-6" />
+          </button>
+        </div>
+        <div className="p-10 space-y-8">
+          <div>
+            <span className="text-[10px] font-bold uppercase tracking-widest text-cyan-400 border border-cyan-500/30 px-3 py-1 rounded-full mb-4 inline-block">{project.tech[0]}</span>
+            <h2 className="text-5xl font-orbitron font-bold text-white mb-4">{project.title}</h2>
+            <p className="text-gray-300 text-lg leading-relaxed">{project.description}</p>
+          </div>
+          
+          <div className="grid md:grid-cols-2 gap-8">
+            <div className="space-y-4">
+              <h3 className="text-xl font-orbitron font-bold text-cyan-400 uppercase">Tech Stack</h3>
+              <div className="flex flex-wrap gap-2">
+                {project.tech.map((t) => (
+                  <span key={t} className="px-3 py-1 rounded-lg bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-sm font-mono">{t}</span>
+                ))}
+              </div>
+            </div>
+            
+            <div className="space-y-4">
+              <h3 className="text-xl font-orbitron font-bold text-violet-400 uppercase">Challenges Overcome</h3>
+              <ul className="space-y-2">
+                {challenges[project.id as keyof typeof challenges]?.map((challenge, i) => (
+                  <li key={i} className="flex items-start gap-3 text-gray-300">
+                    <span className="text-violet-400 font-bold mt-1">▸</span>
+                    <span>{challenge}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+          
+          <div className="flex gap-4 pt-8 border-t border-white/10">
+            <a href={project.demoUrl} className="flex-1 py-4 bg-cyan-500 text-[#0B0E14] rounded-xl font-orbitron font-bold text-center hover:scale-105 transition-transform flex items-center justify-center gap-2">
+              <Gamepad2 className="w-5 h-5" /> PLAY DEMO
+            </a>
+            <a href={project.codeUrl} className="flex-1 py-4 glass border-white/20 text-white rounded-xl font-orbitron font-bold text-center hover:bg-white/5 transition-all flex items-center justify-center gap-2">
+              <Github className="w-5 h-5" /> VIEW SOURCE
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// 2. ENHANCED STORY MODAL with responsive animations
 const StoryModal = ({ story, onClose }: { story: Story, onClose: () => void }) => {
   const [loreExpansion, setLoreExpansion] = useState('');
   const [loading, setLoading] = useState(false);
@@ -125,17 +206,19 @@ const StoryModal = ({ story, onClose }: { story: Story, onClose: () => void }) =
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/90 backdrop-blur-md">
-      <div className="w-full max-w-2xl glass border-white/10 rounded-3xl overflow-hidden shadow-[0_0_100px_rgba(0,0,0,0.8)] animate-in zoom-in-95 duration-300">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-6 bg-black/90 backdrop-blur-md animate-in fade-in duration-300">
+      <div className="w-full max-w-2xl glass border-white/10 rounded-3xl overflow-hidden shadow-[0_0_100px_rgba(0,0,0,0.8)] max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-300">
         <div className="relative h-64">
           <img src={story.illustration} alt={story.title} className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-t from-[#0B0E14] to-transparent" />
-          <button onClick={onClose} className="absolute top-4 right-4 w-10 h-10 rounded-full glass flex items-center justify-center text-white hover:bg-white/10 transition-colors">×</button>
+          <button onClick={onClose} className="absolute top-4 right-4 w-10 h-10 rounded-full glass flex items-center justify-center text-white hover:bg-white/10 transition-colors z-10">
+            <X className="w-6 h-6" />
+          </button>
         </div>
-        <div className="p-10">
+        <div className="p-6 md:p-10">
           <span className="text-[10px] font-bold uppercase tracking-widest text-cyan-400 border border-cyan-500/30 px-3 py-1 rounded-full mb-4 inline-block">{story.csConcept}</span>
-          <h3 className="text-4xl font-orbitron font-bold text-white mb-6">{story.title}</h3>
-          <p className="text-gray-300 text-lg leading-relaxed mb-8 italic">"{story.plot}"</p>
+          <h3 className="text-3xl md:text-4xl font-orbitron font-bold text-white mb-6">{story.title}</h3>
+          <p className="text-gray-300 text-base md:text-lg leading-relaxed mb-8 italic">"{story.plot}"</p>
           {loreExpansion ? (
             <div className="p-6 rounded-2xl bg-white/5 border border-white/10 animate-in fade-in slide-in-from-bottom-2">
               <h4 className="text-xs font-bold text-violet-400 mb-2 tracking-widest uppercase">Lore Archive</h4>
@@ -154,7 +237,9 @@ const StoryModal = ({ story, onClose }: { story: Story, onClose: () => void }) =
 
 const App: React.FC = () => {
   const [activeStory, setActiveStory] = useState<Story | null>(null);
+  const [activeProject, setActiveProject] = useState<Project | null>(null);
   const [showSkills, setShowSkills] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
   const skillsRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -259,8 +344,8 @@ const App: React.FC = () => {
                     ))}
                   </div>
                   <div className="flex items-center gap-4">
-                    <a href={project.demoUrl} className="flex-1 py-4 glass border-cyan-500/30 text-cyan-400 text-xs font-bold uppercase tracking-widest text-center rounded-xl hover:bg-cyan-500 hover:text-[#0B0E14] transition-all">PLAY DEMO</a>
-                    <a href={project.codeUrl} className="w-14 h-14 flex items-center justify-center glass border-white/10 rounded-xl text-gray-500 hover:text-white transition-all"><Github className="w-6 h-6" /></a>
+                    <button onClick={() => setActiveProject(project)} className="flex-1 py-4 glass border-cyan-500/30 text-cyan-400 text-xs font-bold uppercase tracking-widest text-center rounded-xl hover:bg-cyan-500 hover:text-[#0B0E14] transition-all">DETAILS</button>
+                    <a href={project.demoUrl} className="w-14 h-14 flex items-center justify-center glass border-white/10 rounded-xl text-gray-500 hover:text-white transition-all"><Gamepad2 className="w-6 h-6" /></a>
                   </div>
                 </div>
               </div>
@@ -293,7 +378,7 @@ const App: React.FC = () => {
         </div>
       </section>
 
-      {/* SKILLS SECTION (Neon Pulse on Hover) */}
+      {/* SKILLS SECTION (Enhanced with Neon Glow) */}
       <section id="skills" className="py-32 px-6 bg-[#0B0E14]/80" ref={skillsRef}>
         <div className="max-w-7xl mx-auto">
           <SectionHeader icon={Cpu} title="Technical Skills" subtitle="The tech stack powering our digital universes." />
@@ -304,10 +389,16 @@ const App: React.FC = () => {
                   <span className="text-sm font-orbitron font-bold uppercase tracking-widest text-gray-300 group-hover:text-cyan-400 group-hover:shadow-[0_0_10px_rgba(34,211,238,0.5)] transition-all">{skill.name}</span>
                   <span className="text-xs font-mono text-cyan-400">{skill.level}%</span>
                 </div>
-                <div className="h-2 w-full glass border-white/5 rounded-full overflow-hidden">
-                  <div className="h-full bg-gradient-to-r from-cyan-500 to-violet-500 shadow-[0_0_15px_rgba(6,182,212,0.8)] transition-all duration-1000 ease-out" style={{ width: showSkills ? `${skill.level}%` : '0%' }} />
+                <div className="h-2 w-full glass border-white/5 rounded-full overflow-hidden relative">
+                  <div 
+                    className="h-full bg-gradient-to-r from-cyan-500 to-violet-500 transition-all duration-1000 ease-out"
+                    style={{ 
+                      width: showSkills ? `${skill.level}%` : '0%',
+                      boxShadow: showSkills ? `0 0 20px rgba(6,182,212,0.8), 0 0 40px rgba(6,182,212,0.4), inset 0 0 10px rgba(6,182,212,0.3)` : 'none'
+                    }}
+                  />
                 </div>
-                <span className="text-[10px] text-gray-600 uppercase tracking-widest block font-bold group-hover:animate-neon-pulse">{skill.category}</span>
+                <span className="text-[10px] text-gray-600 uppercase tracking-widest block font-bold">{skill.category}</span>
               </div>
             ))}
           </div>
@@ -320,23 +411,48 @@ const App: React.FC = () => {
           <SectionHeader icon={Mail} title="Contact Uplink" subtitle="Let’s build worlds, systems, and stories together." />
           <div className="grid lg:grid-cols-5 gap-12">
             <div className="lg:col-span-3">
-              <form className="glass border-white/10 p-10 rounded-[40px] shadow-2xl space-y-8">
+              <form 
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  setShowSuccess(true);
+                  setTimeout(() => setShowSuccess(false), 5000);
+                  (e.target as HTMLFormElement).reset();
+                }}
+                className="glass border-white/10 p-10 rounded-[40px] shadow-2xl space-y-8"
+              >
                 <div className="grid md:grid-cols-2 gap-8">
                   <div className="space-y-3">
                     <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500 ml-1">Identity (Name)</label>
-                    <input type="text" placeholder="Subject Name" className="w-full py-5 px-8 rounded-2xl glass border-white/10 text-white placeholder:text-gray-700 focus:outline-none focus:border-cyan-500/50 focus:shadow-[0_0_15px_rgba(6,182,212,0.1)] transition-all" />
+                    <input type="text" placeholder="Subject Name" required className="w-full py-5 px-8 rounded-2xl glass border-white/10 text-white placeholder:text-gray-700 focus:outline-none focus:border-cyan-500/50 focus:shadow-[0_0_15px_rgba(6,182,212,0.1)] transition-all" />
                   </div>
                   <div className="space-y-3">
                     <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500 ml-1">Frequency (Email)</label>
-                    <input type="email" placeholder="Uplink Protocol" className="w-full py-5 px-8 rounded-2xl glass border-white/10 text-white placeholder:text-gray-700 focus:outline-none focus:border-cyan-500/50 focus:shadow-[0_0_15px_rgba(6,182,212,0.1)] transition-all" />
+                    <input type="email" placeholder="Uplink Protocol" required className="w-full py-5 px-8 rounded-2xl glass border-white/10 text-white placeholder:text-gray-700 focus:outline-none focus:border-cyan-500/50 focus:shadow-[0_0_15px_rgba(6,182,212,0.1)] transition-all" />
                   </div>
                 </div>
                 <div className="space-y-3">
                   <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500 ml-1">The Message (Payload)</label>
-                  <textarea rows={5} placeholder="Encrypted Data Payload..." className="w-full py-5 px-8 rounded-2xl glass border-white/10 text-white placeholder:text-gray-700 focus:outline-none focus:border-cyan-500/50 focus:shadow-[0_0_15px_rgba(6,182,212,0.1)] transition-all resize-none" />
+                  <textarea rows={5} placeholder="Encrypted Data Payload..." required className="w-full py-5 px-8 rounded-2xl glass border-white/10 text-white placeholder:text-gray-700 focus:outline-none focus:border-cyan-500/50 focus:shadow-[0_0_15px_rgba(6,182,212,0.1)] transition-all resize-none" />
                 </div>
-                <button type="button" className="w-full py-6 bg-gradient-to-r from-cyan-500 to-violet-600 text-[#0B0E14] font-orbitron font-black text-xl rounded-2xl transition-all hover:scale-[1.02] shadow-[0_0_40px_rgba(6,182,212,0.3)] flex items-center justify-center gap-4">INITIATE UPLINK <Send className="w-6 h-6" /></button>
+                <button type="submit" className="w-full py-6 bg-gradient-to-r from-cyan-500 to-violet-600 text-[#0B0E14] font-orbitron font-black text-xl rounded-2xl transition-all hover:scale-[1.02] shadow-[0_0_40px_rgba(6,182,212,0.3)] flex items-center justify-center gap-4">INITIATE UPLINK <Send className="w-6 h-6" /></button>
               </form>
+              
+              {/* Success Message */}
+              {showSuccess && (
+                <div className="fixed bottom-8 right-8 max-w-sm animate-in fade-in slide-in-from-bottom-4 duration-500 z-50">
+                  <div className="glass border-green-500/50 p-6 rounded-2xl shadow-[0_0_30px_rgba(34,197,94,0.3)]">
+                    <div className="flex items-center gap-4">
+                      <div className="flex-shrink-0">
+                        <CheckCircle className="w-8 h-8 text-green-400 animate-bounce" />
+                      </div>
+                      <div>
+                        <h3 className="text-white font-orbitron font-bold text-lg">UPLINK SUCCESSFUL</h3>
+                        <p className="text-green-300 text-sm mt-1">Your message has been transmitted across the network. We'll respond soon!</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
             <div className="lg:col-span-2 space-y-8">
               <div className="glass border-white/10 p-10 rounded-[40px] h-full flex flex-col justify-between">
@@ -363,6 +479,7 @@ const App: React.FC = () => {
       </footer>
 
       {activeStory && <StoryModal story={activeStory} onClose={() => setActiveStory(null)} />}
+      {activeProject && <ProjectModal project={activeProject} onClose={() => setActiveProject(null)} />}
     </div>
   );
 };
