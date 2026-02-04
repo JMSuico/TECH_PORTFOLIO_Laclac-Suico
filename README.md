@@ -21,8 +21,7 @@ This portfolio showcases the synergy between two developers: **SUICO** (Systems 
 ## 🚀 Installation & Run Instructions
 
 ### Prerequisites
-- A modern web browser.
-- An API Key for Google Gemini (optional, for the "Explore World" AI feature).
+
 
 ### Running Locally
 1. **Clone the project** into your root directory.
