@@ -1,0 +1,59 @@
+NAME: JHON MARK A. SUICO  - MASTER			BSCS 3 – A
+NAME: FRITZ KHEIAN LACLAC -  MEMBER
+Machine Learning 
+1. Introduction
+Machine Learning is a part of Artificial Intelligence that I learned as a way for computers to learn from data. Instead of telling the computer every step, I allow it to learn by itself using examples and experiences. For me, machine learning means teaching a system how to think, decide, and improve over time based on data.
+I see machine learning being used everywhere today, such as in social media, online shopping, games, voice assistants, and even in healthcare. Because of this, I understand why it is very important in the field of Computer Science.
+2. What I Learned About Machine Learning
+What I learned is that machine learning helps computers learn without being programmed line by line. I realized that the more data the system receives, the better it becomes. I also learned that machine learning is not perfect at first, but it improves as it keeps learning from mistakes.
+For myself, machine learning is all about learning from experience, just like how humans learn from practice and repetition.
+3. Types of Machine Learning
+3.1 Supervised Learning
+Supervised learning is the type of machine learning where I give the system data with correct answers. The machine learns by comparing its answers with the correct ones.
+Examples that I understand include spam email detection and predicting grades or prices.
+How it works:
+I train the machine using labeled data. When it makes mistakes, the system adjusts itself until the answers become more accurate.
+3.2 Unsupervised Learning
+Unsupervised learning is when I give the system data without answers. The machine studies the data and finds patterns on its own.
+Examples include grouping customers or organizing similar data.
+How it works:
+The system looks at similarities and differences in the data and groups them without my guidance.
+3.3 Semi-Supervised Learning
+Semi-supervised learning is a mix of supervised and unsupervised learning. I use a small amount of labeled data and a large amount of unlabeled data.
+Examples include image and speech recognition systems.
+How it works:
+The system first learns from labeled data, then uses that knowledge to understand unlabeled data better.
+3.4 Reinforcement Learning
+Reinforcement learning is where the system learns through trial and error. I let the machine try actions, and it learns from rewards and penalties.
+Examples include game AI and robots.
+How it works:
+The machine repeats actions that give rewards and avoids actions that give penalties, improving its decisions over time.
+4. How Machine Learning Works (My Understanding)
+1.	I collect data
+2.	I clean and prepare the data
+3.	I choose a machine learning model
+4.	I train the system
+5.	I test its performance
+6.	I use it to make predictions or decisions
+5. What Machine Learning Is Doing Today
+Based on what I observed, machine learning is used in:
+•	Social media recommendations
+•	Online shopping suggestions
+•	Voice assistants
+•	Games and simulations
+•	Medical support systems
+6. Advantages of Machine Learning
+From my perspective, machine learning:
+•	Saves time and effort
+•	Improves accuracy over time
+•	Handles large amounts of data
+•	Helps in decision-making
+7. Limitations of Machine Learning
+I also learned that machine learning has limitations:
+•	It needs a lot of data
+•	It can be biased if the data is biased
+•	It requires powerful computers
+•	It still needs human supervision
+8. Conclusion
+In conclusion, I learned that machine learning allows computers to learn from data and experience. For me, it is an important and powerful technology that helps solve real-world problems. As a Computer Science student, understanding machine learning helps me prepare for future technologies and innovations.
+¬¬
